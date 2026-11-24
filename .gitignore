@@ -1,0 +1,8 @@
+/private/
+__pycache__/
+.env
+/local-resources.csv
+/results.csv
+/resources.csv
+/private-lab/
+/.codexflow/

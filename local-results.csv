@@ -1,0 +1,7 @@
+route,parallel,downloads_ok,downloads_failed,probe_ok,probe_failed,mibit_per_second,ping_p95_ms,probe_samples
+direct,1,523,0,37,0,2085.06,2.29,37
+tunnel,1,0,2,0,2,0.0,,2
+direct,4,1177,0,35,0,4695.09,3.97,35
+tunnel,4,0,8,0,2,0.0,,2
+direct,16,940,0,27,0,3361.16,26.89,27
+tunnel,16,0,32,0,2,0.0,,2

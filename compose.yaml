@@ -1,0 +1,18 @@
+x-image: &image ghcr.io/xtls/xray-core@sha256:9812e382e229e9ed63fd179bf1a4e3fe244c12ff3ae4fd8128745d79c87575ab
+services:
+  tunnel:
+    image: *image
+    command: [run, -c, /config.json]
+    ports:
+      - "${BIND_ADDRESS:-0.0.0.0}:${PORT:-443}:443/tcp"
+    volumes:
+      - ./private/server.json:/config.json:ro
+    restart: unless-stopped
+  client:
+    image: *image
+    profiles: [client]
+    command: [run, -c, /config.json]
+    ports:
+      - "127.0.0.1:1080:1080/tcp"
+    volumes:
+      - ./private/client.json:/config.json:ro

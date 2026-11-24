@@ -1,0 +1,29 @@
+services:
+  tunnel:
+    ports: !reset []
+    networks:
+      default:
+        ipv4_address: 172.30.184.20
+    volumes:
+      - ./private-lab/server.json:/config.json:ro
+  client:
+    volumes:
+      - ./private-lab/client.json:/config.json:ro
+  target:
+    image: python@sha256:c5ba3deef00c7758561a0f03c26f44f10589263d40e732b8748e0d1f38f6dd89
+    command: [python, /target.py, --bind, 0.0.0.0, --lab-tls-dir, /tls]
+    volumes:
+      - ./target.py:/target.py:ro
+      - ./private-lab/tls.crt:/tls/tls.crt:ro
+      - ./private-lab/tls.key:/tls/tls.key:ro
+    ports:
+      - "127.0.0.1:18080:18080/tcp"
+    networks:
+      default:
+        ipv4_address: 172.30.184.10
+
+networks:
+  default:
+    ipam:
+      config:
+        - subnet: 172.30.184.0/24
