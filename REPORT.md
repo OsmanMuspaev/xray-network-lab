@@ -25,6 +25,37 @@ All trials completed without recorded request errors. At 16 download workers, la
 
 Raw data: [18 trials](lab-results.csv) and [185 resource samples](lab-resources.csv). Total benchmark runtime was about 93 seconds.
 
+## VPS benchmark
+
+On November 24, 2026, Xray 26.11.9 ran on an Ubuntu 24.04 VPS in the Netherlands with 1 vCPU and about 2 GiB RAM. A client on a Mac reached a public HTTPS endpoint through the deployed tunnel. The request returned HTTP 200 before and after the benchmark.
+
+The load target was a temporary HTTP service on the VPS itself. The Mac reached it directly and through the Xray listener. Each workload ran three trials per route with a five-second window for starting requests and a four-second timeout per request. Requests already in progress could extend the measured interval. The throughput calculation includes only complete 4 MiB downloads.
+
+| Workers | Route | Median, Mibit/s | p95, ms per trial | Successful probes per trial | Download errors | Probe errors |
+| ---: | --- | ---: | --- | --- | ---: | ---: |
+| 1 | Direct | 13.70 | 421.53 / 363.41 / 371.70 | 9 / 9 / 9 | 0 | 0 |
+| 1 | Tunnel | 7.26 | 767.67 / 754.92 / 717.57 | 6 / 4 / 6 | 2 | 1 |
+| 4 | Direct | 36.64 | 372.93 / 420.36 / 381.60 | 9 / 9 / 9 | 3 | 0 |
+| 4 | Tunnel | 38.31 | 749.05 / 766.92 / 966.97 | 6 / 6 / 6 | 4 | 0 |
+| 16 | Direct | 71.03 | 630.49 / 1478.26 / 2347.63 | 8 / 8 / 5 | 45 | 0 |
+| 16 | Tunnel | 63.46 | 898.73 / 1068.44 / 936.37 | 5 / 5 / 5 | 45 | 0 |
+
+Xray's sampled peak during tunneled trials was 14.35% CPU and 54.87 MiB RAM. At 16 workers each route recorded 45 download errors. The benchmark groups timeouts, HTTP failures, and unexpected response sizes into one counter, so the error counts do not establish the cause. With the target on the VPS, this run measures the client-to-VPS path and tunnel overhead under this workload. It does not measure forwarding to a separate origin, establish a reliable concurrency limit, or test ISP filtering. The temporary HTTP listener was removed after testing.
+
+Raw data: [18 VPS trials](vps-results.csv) and [656 resource samples](vps-resources.csv). The VPS trial sequence lasted about 136 seconds. I estimate I spent about five hours actively working on the assignment, much of it troubleshooting connectivity to the initial VPS IP address. I waited about a day and a half before I could change the IP. That wait is excluded from the five-hour estimate.
+
+### Longer timeout retest
+
+A follow-up used the same target with two trials on each route at 4, 8, and 16 workers. The request-start window was seven seconds and the per-request timeout was 12 seconds. At 16 workers the direct route recorded two download errors and the tunnel recorded eight. Across all 12 trials, the short probes completed without errors. The repeat still showed download failures, so no error-free capacity limit was established. The changed run settings and network conditions prevent attributing the improvement to the timeout alone.
+
+A route check on the Mac after the retest showed that traffic to the VPS used an existing system tunnel interface. The direct baseline here means direct at the benchmark's application layer. These runs cannot establish access from a native ISP route. [Follow-up CSV](vps-retest.csv)
+
+### Phone connectivity check
+
+On November 24, 2026, the tester reported that the control page loaded on the phone with Xray disconnected and failed to load with Xray enabled in Happ. The network type and provider were not recorded. A concurrent server check recorded no accepted Xray requests. The incoming TCP packets could not be attributed to the phone. The cause remains undetermined.
+
+On November 26, after changing the VPS IP address, I tested the VLESS profile in Happ on an iPhone over Wi-Fi in Crimea. The test page loaded. The benchmarks above were run before the address changed. I could not determine why the initial IP was unreachable.
+
 ## Remote benchmark procedure
 
 1. Check that the test node is reachable directly and through the tunnel. Record the date, region, ISP, connection type, VPS specs, Xray version, and workload.
@@ -32,7 +63,7 @@ Raw data: [18 trials](lab-results.csv) and [185 resource samples](lab-resources.
 3. Match trial timestamps to server CPU and RAM samples. Report median throughput, per-trial p95 with successful sample counts, and errors.
 4. If a timeout occurs, repeat the direct control request and inspect server logs, CPU, and network conditions. Record an unknown cause when the evidence is inconclusive.
 
-Remote throughput, ISP reachability, and profile import in third-party clients remain unverified.
+A separate public origin, identified fixed-line and mobile networks, and profile import in third-party clients remain unverified. No traffic-volume threshold for filtering was measured.
 
 ## Protocol and network considerations
 

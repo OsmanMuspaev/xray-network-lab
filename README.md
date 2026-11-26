@@ -49,6 +49,8 @@ docker compose up -d tunnel
 docker compose logs --tail 20 tunnel
 ```
 
+On a native Linux Docker host, the pinned image runs as UID 65532. If Xray reports permission denied for the generated mode-0600 config, run `sudo chown 65532 private/server.json` and retry. Keep the `private/` directory at mode 0700.
+
 For a different public port, pass the same number to `configure.py --port` and Compose's `PORT` environment variable. Keep `private/server.json` on the VPS because it contains the server's private key. Share `private/profile.txt` only with authorized clients.
 
 To run the Docker client, copy `compose.yaml` and `private/client.json` to the client machine. Run `docker compose --profile client up -d client` to expose the loopback SOCKS proxy.
